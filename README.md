@@ -1,68 +1,95 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Epic User CRUD
 
-## Available Scripts
+## Starting the Service and Browser Application
 
-In the project directory, you can run:
+First you will need to start the services from the `epic-web-test` project:
 
-### `npm start`
+`yarn start`
+`yarn watch-service`
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+You'll need to install the dependencies in this project with `yarn` or `npm install`.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+There are two services to start to use the Epic User CRUD application:
 
-### `npm test`
+`yarn start:apollo`
+Starts the Apollo Server for executing GraphQL queries. The front-end CRUD application is dependent on this service!
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+`yarn start`
+Starts the create-react-app dev environment and spins up a development version of the front-end application. By default the CRUD application points to port `4001` for executing GraphQL queries.
 
-### `npm run build`
+## User Experience and Front-End Design Considerations
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+My main goals were to make a responsive, intuitive user CRUD application that works with a GraphQL backend.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+### React
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+With React it is easy to create re-useable web components to make single page applications. I find the unidirectional data flow and component lifecycle easy to learn and follow. React provides easy component state management and there's thousands of first or third party packages to extend its behavior.
 
-### `npm run eject`
+Specifically I wanted to use React 16 and give hooks a try. I found they were a simple way to keep my components as functional and still have local component state.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### GraphQL
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+While it I do believe it is overkill for such a simple API, I wanted to use GraphQL as an example on its power in data fetching and leverage the UI and UX benefits from Apollo's tooling.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+With GraphQL data fetching over APIs is optimized by only fetching the data you need.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Apollo Server
 
-## Learn More
+Apollo Server provides an easy way to spin up a "Front-End Back-End" GraphQL service. This allows the front-end developer to design their own API for their front-end applications to use. It also means that only one endpoint is exposed to client applications which implementing data fetching and security into them.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Apollo Server makes it easy to add monitoring and caching for GraphQL requests and plugs in easily with Apollo Client.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+#### Playground
 
-### Code Splitting
+When you run `yarn start:apollo`, or `node ./apollo-server/index.js` from the root of the application, the Apollo Server GraphQL service spins up and provides an interactive playground for exploring your API. If you go to `http://localhost:4001` while its running you can execute GraphQL queries and mutations in the playground. I find this interactivity a great learning tool while front-end developers, or any API consumers, to understand what your API is capable of.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+### Apollo Client
 
-### Analyzing the Bundle Size
+Apollo Client is the front-end piece of the GraphQL tooling for this project. Apollo Client provides has implementations that plug in easily with React by providing a component for executing GraphQL queries and passing the results as props to your component tree.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+Results from queries and mutations are shaped just as you requested them, meaning the developer's implementation defines the shape of the response. This naturally plugs into react as props!
 
-### Making a Progressive Web App
+Apollo Client also provides built in global state management (similar to redux), caching, and composable networking!
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+#### Optimistic UI
 
-### Advanced Configuration
+An optimistic UI is one that updates the frontend state of the application to represent the the backend before requests are completed. This gives the application a snappy, responsive feel.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+## State Management
 
-### Deployment
+My goal for state management was to leverage local component state as much as possible. I avoided things like redux, unstated, and apollo-link-state intentionally. With Apollo Client there is a way to keep state in its cache, which you can query for just like any other GraphQL resource. I've got experience for all of these state managment tools, but felt that the application was simple enough to avoid using them!
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+## Styling
 
-### `npm run build` fails to minify
+I wanted to make sure the application was responsive, had some animations, and was nice to look at.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+### Responsive
+
+The application provides the same experience on any size screen. This was implemented using simple percent-based CSS widths only. I've had experience using grid systems and media queries.
+
+### Modern Font Stack
+
+The application uses the "modern font stack", which means it uses built-in system fonts. Fonts are some of the largest resources many applications request. Using system fonts saves the cost of fetching these fonts, and also gives the application a "native" feel.
+
+### `@emotion` and Styled Components
+
+There's a lot of ways to do CSS with React components, but I opted for `@emotion/styled` which has a similar API to `styled-components`. This provides an easy API for creating web components with style that can be composed with other components as you would expect.
+
+It also comes with some other css style helpers for writing styles in CSS but still being able to inject them into the `style` prop of components.
+
+## TODO
+
+- Tests
+  - In general I write tests for every single component I wrote, typically using:
+    - jest for test running and creating component snapshots.
+    - enzyme for rendering components and inspecting their lifecycles.
+    - webdriver.io for end-to-end browser testing.
+- Validation
+  - The forms for editing and adding contacts need validation for each of their fields
+    - Name is required
+    - Birthday should be a valid date
+    - Email should be a valid email address
+- Animations
+  - More animations to give feedback to the user on how the application is changing its state.
+    - When modal closes
+    - When user is deleted and the list shuffles
